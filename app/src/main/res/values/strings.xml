@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">PureShot</string>
+    <string name="capture">Çek</string>
+    <string name="iso">ISO</string>
+    <string name="shutter_speed">Enstantane</string>
+    <string name="white_balance">Beyaz Dengesi</string>
+    <string name="focus">Odak</string>
+    <string name="auto">Oto</string>
+    <string name="raw_mode">RAW</string>
+    <string name="camera_permission_required">Kamera izni gerekli</string>
+    <string name="saving">Kaydediliyor...</string>
+    <string name="saved">Kaydedildi!</string>
+</resources>

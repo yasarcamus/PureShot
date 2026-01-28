@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors - Dark Theme -->
+    <color name="primary">#1A1A2E</color>
+    <color name="primary_variant">#16213E</color>
+    <color name="secondary">#E94560</color>
+    <color name="secondary_variant">#FF6B6B</color>
+    
+    <!-- Background -->
+    <color name="background">#0F0F1A</color>
+    <color name="surface">#1A1A2E</color>
+    
+    <!-- Text Colors -->
+    <color name="on_primary">#FFFFFF</color>
+    <color name="on_secondary">#FFFFFF</color>
+    <color name="on_background">#E8E8E8</color>
+    <color name="on_surface">#E8E8E8</color>
+    
+    <!-- Accent Colors -->
+    <color name="accent_blue">#4ECDC4</color>
+    <color name="accent_orange">#FF8C42</color>
+    <color name="shutter_button">#E94560</color>
+    <color name="shutter_button_pressed">#FF6B6B</color>
+    
+    <!-- Control Colors -->
+    <color name="slider_active">#4ECDC4</color>
+    <color name="slider_inactive">#3A3A5C</color>
+    <color name="control_background">#252542</color>
+    
+    <!-- Transparent overlays -->
+    <color name="overlay_dark">#99000000</color>
+    <color name="overlay_light">#33FFFFFF</color>
+</resources>
