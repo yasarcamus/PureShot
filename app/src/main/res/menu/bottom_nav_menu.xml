@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/cameraFragment"
+        android:icon="@drawable/ic_camera_nav"
+        android:title="Kamera" />
+    <item
+        android:id="@+id/proSettingsFragment"
+        android:icon="@drawable/ic_pro_nav"
+        android:title="Pro" />
+    <item
+        android:id="@+id/guideFragment"
+        android:icon="@drawable/ic_guide_nav"
+        android:title="Rehber" />
+</menu>

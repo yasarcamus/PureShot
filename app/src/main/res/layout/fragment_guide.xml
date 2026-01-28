@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📖 Fotoğrafçılık Rehberi"
+            android:textColor="@color/on_primary"
+            android:textSize="24sp"
+            android:fontFamily="sans-serif-bold"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Manuel kamera ayarlarını öğren ve profesyonel fotoğraflar çek"
+            android:textColor="#88FFFFFF"
+            android:textSize="14sp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- ISO Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/guide_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📷 ISO Nedir?"
+                android:textColor="@color/accent_blue"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ISO, sensörün ışığa olan duyarlılığını belirler."
+                android:textColor="@color/on_primary"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#22FFFFFF"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Düşük ISO (50-400)"
+                        android:textColor="@color/secondary"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="✓ Daha az gürültü\n✓ Net detaylar\n✗ Daha fazla ışık gerekir"
+                        android:textColor="#CCFFFFFF"
+                        android:textSize="11sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="1dp" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:background="#22FFFFFF"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Yüksek ISO (1600+)"
+                        android:textColor="@color/accent_orange"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="✓ Düşük ışıkta kullanışlı\n✗ Daha fazla gürültü\n✗ Detay kaybı"
+                        android:textColor="#CCFFFFFF"
+                        android:textSize="11sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="💡 İpucu: Gündüz çekimlerde ISO 100-400 kullan. Gece veya iç mekanda sensör yeterliyse ISO 800-3200 dene."
+                android:textColor="#AAFFFFFF"
+                android:textSize="12sp"
+                android:background="#11FFFFFF"
+                android:padding="10dp" />
+        </LinearLayout>
+
+        <!-- Shutter Speed Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/guide_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⏱️ Shutter Speed (Enstantane)"
+                android:textColor="@color/accent_orange"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Enstantane, sensörün ışığa maruz kalma süresini belirler. Hızlı hareketleri dondurmak veya hareket efekti oluşturmak için kullanılır."
+                android:textColor="@color/on_primary"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🏃 Hızlı Hareket: 1/500s - 1/8000s\n🚶 Normal: 1/60s - 1/250s\n🌙 Gece/Uzun pozlama: 1s - 30s"
+                android:textColor="#CCFFFFFF"
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:background="#22FFFFFF"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="💡 İpucu: Elden çekim için minimum 1/60s kullan. Daha yavaş hızlarda tripod gerekir."
+                android:textColor="#AAFFFFFF"
+                android:textSize="12sp"
+                android:background="#11FFFFFF"
+                android:padding="10dp" />
+        </LinearLayout>
+
+        <!-- White Balance Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/guide_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎨 White Balance (Beyaz Dengesi)"
+                android:textColor="@color/secondary"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Beyaz dengesi, fotoğraftaki renk sıcaklığını kontrol eder. Kelvin (K) cinsinden ölçülür."
+                android:textColor="@color/on_primary"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🕯️ 2000K-3000K: Sıcak (turuncu/sarı)\n☁️ 5000K-5500K: Gün ışığı (nötr)\n🌤️ 6500K-7500K: Bulutlu\n💎 8000K-10000K: Soğuk (mavi)"
+                android:textColor="#CCFFFFFF"
+                android:textSize="13sp"
+                android:lineSpacingExtra="4dp"
+                android:background="#22FFFFFF"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="💡 İpucu: Portre çekimlerinde 5500K-6000K aralığı doğal cilt tonları verir."
+                android:textColor="#AAFFFFFF"
+                android:textSize="12sp"
+                android:background="#11FFFFFF"
+                android:padding="10dp" />
+        </LinearLayout>
+
+        <!-- Composition Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/guide_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📐 Kompozisyon Kuralları"
+                android:textColor="#BB86FC"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="▸ Üçler Kuralı\nKareyi 9 eşit parçaya böl. Önemli öğeleri çizgilerin kesişim noktalarına yerleştir."
+                android:textColor="@color/on_primary"
+                android:textSize="13sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="▸ Leading Lines\nDoğal çizgileri (yollar, nehirler) kullanarak bakışı konuya yönlendir."
+                android:textColor="@color/on_primary"
+                android:textSize="13sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="▸ Simetri\nYansımalar ve simetrik yapılar güçlü görseller oluşturur."
+                android:textColor="@color/on_primary"
+                android:textSize="13sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="💡 Grid özelliğini aç → Ekranda üçler çizgilerini göreceksin!"
+                android:textColor="#AAFFFFFF"
+                android:textSize="12sp"
+                android:background="#11FFFFFF"
+                android:padding="10dp" />
+        </LinearLayout>
+
+        <!-- Modes Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/guide_card"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎯 Çekim Modları"
+                android:textColor="#03DAC5"
+                android:textSize="18sp"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#22FFFFFF"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="AUTO"
+                    android:textColor="@color/secondary"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="AI tüm ayarları otomatik yapar. Hızlı çekimler için ideal."
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#22FFFFFF"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="PRO"
+                    android:textColor="@color/accent_blue"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tam manuel kontrol: ISO, Shutter, WB. Yaratıcı çekimler için."
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#22FFFFFF"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="PORTRAIT"
+                    android:textColor="@color/accent_orange"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="AI ile arka plan blur + cilt tonu optimizasyonu. Selfie ve portreler için."
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#22FFFFFF"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="NIGHT"
+                    android:textColor="#BB86FC"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Düşük ışık optimizasyonu. Multi-frame birleştirme ile parlak ve net gece fotoğrafları."
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#22FFFFFF"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="HDR"
+                    android:textColor="#03DAC5"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Yüksek dinamik aralık. Güneşli günlerde gölge ve ışık detaylarını korur."
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Footer -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="PureShot Pro v3.0 ile profesyonel fotoğraflar çek! 📸"
+            android:textColor="#66FFFFFF"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>

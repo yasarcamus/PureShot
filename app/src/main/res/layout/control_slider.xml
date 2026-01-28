@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="8dp">
+
+    <TextView
+        android:id="@+id/tvLabel"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:text="ISO"
+        android:textColor="@color/accent_blue"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-bold" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:max="100"
+        android:progress="10"
+        android:progressTint="@color/slider_active"
+        android:thumbTint="@color/accent_blue" />
+
+    <TextView
+        android:id="@+id/tvValue"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:text="100"
+        android:textColor="@color/on_primary"
+        android:textSize="14sp"
+        android:gravity="end"
+        android:fontFamily="sans-serif-medium" />
+</LinearLayout>

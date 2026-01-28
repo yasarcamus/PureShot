@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="8dp">
+
+    <TextView
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:text="SS"
+        android:textColor="@color/accent_orange"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-bold" />
+
+    <SeekBar
+        android:id="@+id/seekBarShutter"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:max="15"
+        android:progress="4"
+        android:progressTint="@color/slider_active"
+        android:thumbTint="@color/accent_orange" />
+
+    <TextView
+        android:id="@+id/tvShutterValue"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:text="1/500"
+        android:textColor="@color/on_primary"
+        android:textSize="14sp"
+        android:gravity="end"
+        android:fontFamily="sans-serif-medium" />
+</LinearLayout>

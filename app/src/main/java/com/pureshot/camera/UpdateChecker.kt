@@ -18,7 +18,7 @@ class UpdateChecker(private val context: Context) {
         private const val TAG = "UpdateChecker"
         private const val GITHUB_API_URL = 
             "https://api.github.com/repos/yasarcamus/PureShot/releases/latest"
-        private const val CURRENT_VERSION = "2.0.0"
+        private const val CURRENT_VERSION = "3.0.0"
     }
     
     data class UpdateInfo(
