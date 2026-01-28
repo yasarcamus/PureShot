@@ -11,16 +11,25 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Top Info Bar -->
+    <!-- Grid Overlay -->
+    <View
+        android:id="@+id/gridOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/grid_overlay"
+        android:visibility="gone" />
+
+    <!-- Top Bar -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="@color/overlay_dark"
+        android:padding="12dp"
+        android:background="@drawable/gradient_top"
         android:gravity="center_vertical">
 
+        <!-- Camera Info -->
         <TextView
             android:id="@+id/tvCameraInfo"
             android:layout_width="0dp"
@@ -28,21 +37,55 @@
             android:layout_weight="1"
             android:text="PureShot"
             android:textColor="@color/on_primary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:fontFamily="sans-serif-medium" />
 
-        <TextView
-            android:id="@+id/tvRawIndicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ZERO PROCESSING"
-            android:textColor="@color/secondary"
-            android:textSize="12sp"
-            android:fontFamily="sans-serif-bold"
-            android:background="@drawable/badge_background"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp" />
+        <!-- Grid Toggle -->
+        <ImageButton
+            android:id="@+id/btnGrid"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_grid"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Grid"
+            android:alpha="0.7"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Camera Switch -->
+        <ImageButton
+            android:id="@+id/btnSwitchCamera"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_switch_camera"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Kamera Değiştir"
+            android:alpha="0.7" />
     </LinearLayout>
+
+    <!-- Center Focus Indicator -->
+    <View
+        android:id="@+id/focusIndicator"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        android:background="@drawable/focus_indicator"
+        android:visibility="gone" />
+
+    <!-- Zoom Indicator -->
+    <TextView
+        android:id="@+id/tvZoomLevel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="200dp"
+        android:text="1.0x"
+        android:textColor="@color/on_primary"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-medium"
+        android:background="@drawable/zoom_badge"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:visibility="gone" />
 
     <!-- Manual Controls Panel -->
     <LinearLayout
@@ -51,9 +94,46 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:background="@color/overlay_dark"
+        android:background="@drawable/gradient_bottom"
         android:padding="16dp"
-        android:layout_marginBottom="100dp">
+        android:paddingBottom="120dp">
+
+        <!-- Zoom Control -->
+        <LinearLayout
+            android:id="@+id/zoomControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:text="🔍"
+                android:textSize="20sp"
+                android:gravity="center" />
+
+            <SeekBar
+                android:id="@+id/seekBarZoom"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@color/accent_blue"
+                android:thumbTint="@color/accent_blue" />
+
+            <TextView
+                android:id="@+id/tvZoomValue"
+                android:layout_width="56dp"
+                android:layout_height="wrap_content"
+                android:text="1.0x"
+                android:textColor="@color/on_primary"
+                android:textSize="14sp"
+                android:gravity="end"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
 
         <!-- ISO Control -->
         <LinearLayout
@@ -61,15 +141,17 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            android:id="@+id/isoControl">
 
             <TextView
-                android:layout_width="60dp"
+                android:layout_width="48dp"
                 android:layout_height="wrap_content"
                 android:text="ISO"
                 android:textColor="@color/accent_blue"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-bold" />
 
             <SeekBar
                 android:id="@+id/seekBarIso"
@@ -83,7 +165,7 @@
 
             <TextView
                 android:id="@+id/tvIsoValue"
-                android:layout_width="60dp"
+                android:layout_width="56dp"
                 android:layout_height="wrap_content"
                 android:text="100"
                 android:textColor="@color/on_primary"
@@ -98,15 +180,17 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_marginBottom="12dp"
+            android:visibility="gone"
+            android:id="@+id/shutterControl">
 
             <TextView
-                android:layout_width="60dp"
+                android:layout_width="48dp"
                 android:layout_height="wrap_content"
                 android:text="SS"
                 android:textColor="@color/accent_orange"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-bold" />
 
             <SeekBar
                 android:id="@+id/seekBarShutter"
@@ -120,7 +204,7 @@
 
             <TextView
                 android:id="@+id/tvShutterValue"
-                android:layout_width="60dp"
+                android:layout_width="56dp"
                 android:layout_height="wrap_content"
                 android:text="1/100"
                 android:textColor="@color/on_primary"
@@ -134,15 +218,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:id="@+id/wbControl">
 
             <TextView
-                android:layout_width="60dp"
+                android:layout_width="48dp"
                 android:layout_height="wrap_content"
                 android:text="WB"
                 android:textColor="@color/secondary"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-bold" />
 
             <SeekBar
                 android:id="@+id/seekBarWb"
@@ -156,7 +242,7 @@
 
             <TextView
                 android:id="@+id/tvWbValue"
-                android:layout_width="60dp"
+                android:layout_width="56dp"
                 android:layout_height="wrap_content"
                 android:text="5500K"
                 android:textColor="@color/on_primary"
@@ -170,45 +256,62 @@
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="110dp"
         android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:gravity="center"
         android:background="@color/surface"
-        android:elevation="8dp">
+        android:elevation="8dp"
+        android:paddingHorizontal="24dp">
+
+        <!-- Last Photo Thumbnail -->
+        <FrameLayout
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="32dp">
+
+            <ImageView
+                android:id="@+id/imgLastPhoto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="@drawable/thumbnail_border"
+                android:contentDescription="Son Fotoğraf" />
+        </FrameLayout>
+
+        <!-- Shutter Button -->
+        <FrameLayout
+            android:layout_width="76dp"
+            android:layout_height="76dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/shutter_button_outer" />
+
+            <ImageButton
+                android:id="@+id/btnCapture"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_gravity="center"
+                android:background="@drawable/shutter_button"
+                android:contentDescription="Çek" />
+        </FrameLayout>
 
         <!-- Manual Mode Toggle -->
         <ImageButton
             android:id="@+id/btnManualMode"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:src="@drawable/ic_manual"
             android:background="@drawable/circle_button_secondary"
             android:contentDescription="Manuel Mod"
-            android:layout_marginEnd="40dp" />
-
-        <!-- Shutter Button -->
-        <ImageButton
-            android:id="@+id/btnCapture"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:src="@drawable/ic_shutter"
-            android:background="@drawable/shutter_button"
-            android:contentDescription="Çek"
-            android:elevation="4dp" />
-
-        <!-- Gallery Button -->
-        <ImageButton
-            android:id="@+id/btnGallery"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_gallery"
-            android:background="@drawable/circle_button_secondary"
-            android:contentDescription="Galeri"
-            android:layout_marginStart="40dp" />
+            android:layout_marginStart="32dp"
+            android:alpha="0.6"
+            android:padding="14dp" />
     </LinearLayout>
 
-    <!-- Toast/Status Message -->
+    <!-- Status Toast -->
     <TextView
         android:id="@+id/tvStatus"
         android:layout_width="wrap_content"
@@ -219,6 +322,7 @@
         android:paddingVertical="12dp"
         android:textColor="@color/on_primary"
         android:textSize="14sp"
+        android:elevation="10dp"
         android:visibility="gone" />
 
 </FrameLayout>

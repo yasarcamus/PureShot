@@ -1,16 +1,19 @@
 package com.pureshot.camera
 
 import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.ImageFormat
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
-import android.hardware.camera2.params.OutputConfiguration
-import android.hardware.camera2.params.SessionConfiguration
 import android.media.Image
 import android.media.ImageReader
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.HandlerThread
+import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
 import android.view.Surface
@@ -19,13 +22,14 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.Executors
 
 /**
- * CameraController - Camera2 API wrapper with ZERO post-processing
+ * CameraController v2.0 - Camera2 API wrapper with ZERO post-processing
  * 
- * Bu sınıf, Xiaomi'nin agresif noise reduction ve sharpening filtrelerini
- * tamamen devre dışı bırakarak sensörden gelen ham veriyi yakalar.
+ * Yenilikler:
+ * - MediaStore ile galeri entegrasyonu
+ * - Ön/arka kamera desteği
+ * - Zoom kontrolü
  */
 class CameraController(
     private val context: Context,
@@ -33,6 +37,8 @@ class CameraController(
 ) {
     companion object {
         private const val TAG = "PureShot"
+        const val CAMERA_BACK = 0
+        const val CAMERA_FRONT = 1
     }
 
     private val cameraManager: CameraManager = 
@@ -50,39 +56,40 @@ class CameraController(
     private var isoRange: android.util.Range<Int>? = null
     private var exposureRange: android.util.Range<Long>? = null
     private var supportsRaw: Boolean = false
+    private var maxZoom: Float = 1f
+    private var activeArraySize: android.graphics.Rect? = null
+    
+    // Current camera (back = 0, front = 1)
+    var currentCamera: Int = CAMERA_BACK
     
     // Manual control values
     var manualIso: Int = 100
-    var manualExposureNs: Long = 10_000_000L // 10ms = 1/100s
-    var manualWhiteBalance: Int = 5500 // Kelvin
-    var manualFocusDistance: Float = 0f // 0 = infinity
+    var manualExposureNs: Long = 10_000_000L
+    var manualWhiteBalance: Int = 5500
+    var manualFocusDistance: Float = 0f
     var useManualMode: Boolean = false
+    var currentZoom: Float = 1f
     
-    // Callback for capture events
-    var onImageSaved: ((String) -> Unit)? = null
+    // Callbacks
+    var onImageSaved: ((String, Uri?) -> Unit)? = null
     var onError: ((String) -> Unit)? = null
+    var onCameraReady: (() -> Unit)? = null
 
-    /**
-     * Camera'yı başlat
-     */
     @SuppressLint("MissingPermission")
     fun openCamera() {
         startBackgroundThread()
         
         try {
-            // Arka kamerayı bul (200MP sensör)
-            cameraId = findBackCamera()
+            cameraId = getCameraId(currentCamera)
             val characteristics = cameraManager.getCameraCharacteristics(cameraId)
-            
-            // Sensör özelliklerini al
             loadCameraCapabilities(characteristics)
             
-            // Kamerayı aç
             cameraManager.openCamera(cameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
                     cameraDevice = camera
                     createCameraPreviewSession()
-                    Log.d(TAG, "Camera opened successfully")
+                    Log.d(TAG, "Camera opened: $cameraId")
+                    onCameraReady?.invoke()
                 }
 
                 override fun onDisconnected(camera: CameraDevice) {
@@ -102,61 +109,55 @@ class CameraController(
         }
     }
 
-    /**
-     * Arka kamerayı bul
-     */
-    private fun findBackCamera(): String {
+    private fun getCameraId(cameraType: Int): String {
+        val facing = if (cameraType == CAMERA_FRONT) 
+            CameraCharacteristics.LENS_FACING_FRONT 
+        else 
+            CameraCharacteristics.LENS_FACING_BACK
+            
         for (id in cameraManager.cameraIdList) {
             val characteristics = cameraManager.getCameraCharacteristics(id)
-            val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
-            if (facing == CameraCharacteristics.LENS_FACING_BACK) {
+            if (characteristics.get(CameraCharacteristics.LENS_FACING) == facing) {
                 return id
             }
         }
         return cameraManager.cameraIdList[0]
     }
 
-    /**
-     * Kamera özelliklerini yükle
-     */
+    fun switchCamera() {
+        close()
+        currentCamera = if (currentCamera == CAMERA_BACK) CAMERA_FRONT else CAMERA_BACK
+        openCamera()
+    }
+
     private fun loadCameraCapabilities(characteristics: CameraCharacteristics) {
-        // ISO aralığı
         isoRange = characteristics.get(CameraCharacteristics.SENSOR_INFO_SENSITIVITY_RANGE)
-        Log.d(TAG, "ISO Range: $isoRange")
-        
-        // Exposure aralığı (nanosaniye)
         exposureRange = characteristics.get(CameraCharacteristics.SENSOR_INFO_EXPOSURE_TIME_RANGE)
-        Log.d(TAG, "Exposure Range: $exposureRange")
         
-        // Sensör boyutu
-        val activeArraySize = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
+        activeArraySize = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE)
         activeArraySize?.let {
             sensorSize = Size(it.width(), it.height())
-            Log.d(TAG, "Sensor Size: ${sensorSize.width}x${sensorSize.height}")
         }
         
-        // RAW desteği kontrol
+        maxZoom = characteristics.get(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM) ?: 1f
+        
         val capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)
         supportsRaw = capabilities?.contains(
             CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_RAW
         ) == true
-        Log.d(TAG, "RAW Support: $supportsRaw")
+        
+        Log.d(TAG, "Camera: ISO=$isoRange, MaxZoom=$maxZoom, RAW=$supportsRaw")
     }
 
-    /**
-     * Preview session oluştur
-     */
     private fun createCameraPreviewSession() {
         try {
             val texture = textureView.surfaceTexture ?: return
             
-            // Preview boyutunu ayarla
             val previewSize = getOptimalPreviewSize()
             texture.setDefaultBufferSize(previewSize.width, previewSize.height)
             
             val surface = Surface(texture)
             
-            // ImageReader for still capture
             val captureSize = getLargestOutputSize()
             imageReader = ImageReader.newInstance(
                 captureSize.width, 
@@ -166,7 +167,7 @@ class CameraController(
             )
             imageReader?.setOnImageAvailableListener({ reader ->
                 val image = reader.acquireLatestImage()
-                image?.let { saveImage(it) }
+                image?.let { saveImageToGallery(it) }
             }, backgroundHandler)
             
             val captureBuilder = cameraDevice?.createCaptureRequest(
@@ -174,18 +175,15 @@ class CameraController(
             ) ?: return
             
             captureBuilder.addTarget(surface)
-            
-            // 🔴 ZERO PROCESSING - Tüm post-processing KAPALI
             applyZeroProcessing(captureBuilder)
+            applyZoom(captureBuilder)
             
-            // Session oluştur
             cameraDevice?.createCaptureSession(
                 listOf(surface, imageReader?.surface),
                 object : CameraCaptureSession.StateCallback() {
                     override fun onConfigured(session: CameraCaptureSession) {
                         captureSession = session
                         try {
-                            // Repeating request for preview
                             session.setRepeatingRequest(
                                 captureBuilder.build(),
                                 null,
@@ -208,108 +206,68 @@ class CameraController(
         }
     }
 
-    /**
-     * 🔴 KRITIK: Tüm post-processing'i devre dışı bırak
-     * Bu, Xiaomi'nin "yağlı boya" efektini tamamen kaldırır!
-     */
+    private fun applyZoom(builder: CaptureRequest.Builder) {
+        activeArraySize?.let { sensor ->
+            val zoom = currentZoom.coerceIn(1f, maxZoom)
+            val centerX = sensor.width() / 2
+            val centerY = sensor.height() / 2
+            val deltaX = ((sensor.width() / zoom) / 2).toInt()
+            val deltaY = ((sensor.height() / zoom) / 2).toInt()
+            
+            val cropRegion = android.graphics.Rect(
+                centerX - deltaX,
+                centerY - deltaY,
+                centerX + deltaX,
+                centerY + deltaY
+            )
+            builder.set(CaptureRequest.SCALER_CROP_REGION, cropRegion)
+        }
+    }
+
+    fun setZoom(zoom: Float) {
+        currentZoom = zoom.coerceIn(1f, maxZoom)
+        updatePreview()
+    }
+
+    fun getMaxZoom(): Float = maxZoom
+
     private fun applyZeroProcessing(builder: CaptureRequest.Builder) {
         builder.apply {
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 NOISE REDUCTION - TAMAMEN KAPALI
-            // Xiaomi'nin agresif gürültü azaltması burada devre dışı
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.NOISE_REDUCTION_MODE, 
-                CaptureRequest.NOISE_REDUCTION_MODE_OFF)
+            set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_OFF)
+            set(CaptureRequest.EDGE_MODE, CaptureRequest.EDGE_MODE_OFF)
+            set(CaptureRequest.COLOR_CORRECTION_MODE, CaptureRequest.COLOR_CORRECTION_MODE_FAST)
+            set(CaptureRequest.HOT_PIXEL_MODE, CaptureRequest.HOT_PIXEL_MODE_OFF)
+            set(CaptureRequest.SHADING_MODE, CaptureRequest.SHADING_MODE_OFF)
+            set(CaptureRequest.TONEMAP_MODE, CaptureRequest.TONEMAP_MODE_FAST)
+            set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF)
+            set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF)
             
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 EDGE ENHANCEMENT (SHARPENING) - KAPALI
-            // Yapay keskinleştirme efektini kaldır
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.EDGE_MODE, 
-                CaptureRequest.EDGE_MODE_OFF)
-            
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 COLOR CORRECTION - FAST/PASSTHROUGH
-            // Renk manipülasyonunu minimize et
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.COLOR_CORRECTION_MODE, 
-                CaptureRequest.COLOR_CORRECTION_MODE_FAST)
-            
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 HOT PIXEL CORRECTION - KAPALI
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.HOT_PIXEL_MODE, 
-                CaptureRequest.HOT_PIXEL_MODE_OFF)
-            
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 LENS SHADING CORRECTION - KAPALI
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.SHADING_MODE, 
-                CaptureRequest.SHADING_MODE_OFF)
-            
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 TONEMAP - FAST (minimal processing)
-            // HDR tone mapping'i minimize et
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.TONEMAP_MODE, 
-                CaptureRequest.TONEMAP_MODE_FAST)
-            
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 FACE DETECTION - KAPALI
-            // Yüz algılama ve güzelleştirmeyi devre dışı bırak
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.STATISTICS_FACE_DETECT_MODE,
-                CaptureRequest.STATISTICS_FACE_DETECT_MODE_OFF)
-            
-            // ═══════════════════════════════════════════════════════════
-            // 🔴 ABERRATION CORRECTION - KAPALI
-            // Renk sapması düzeltmesini kapat
-            // ═══════════════════════════════════════════════════════════
-            set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE,
-                CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE_OFF)
-            
-            // Manuel kontroller aktifse uygula
             if (useManualMode) {
                 applyManualControls(this)
             }
         }
     }
 
-    /**
-     * Manuel kontrolleri uygula
-     */
     private fun applyManualControls(builder: CaptureRequest.Builder) {
         builder.apply {
-            // Auto exposure KAPALI
-            set(CaptureRequest.CONTROL_AE_MODE, 
-                CaptureRequest.CONTROL_AE_MODE_OFF)
+            set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_OFF)
             
-            // Manuel ISO
             isoRange?.let { range ->
                 val clampedIso = manualIso.coerceIn(range.lower, range.upper)
                 set(CaptureRequest.SENSOR_SENSITIVITY, clampedIso)
             }
             
-            // Manuel exposure time
             exposureRange?.let { range ->
                 val clampedExposure = manualExposureNs.coerceIn(range.lower, range.upper)
                 set(CaptureRequest.SENSOR_EXPOSURE_TIME, clampedExposure)
             }
             
-            // Manuel white balance
-            set(CaptureRequest.CONTROL_AWB_MODE, 
-                CaptureRequest.CONTROL_AWB_MODE_OFF)
-            
-            // Manuel focus
-            set(CaptureRequest.CONTROL_AF_MODE, 
-                CaptureRequest.CONTROL_AF_MODE_OFF)
+            set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_OFF)
+            set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_OFF)
             set(CaptureRequest.LENS_FOCUS_DISTANCE, manualFocusDistance)
         }
     }
 
-    /**
-     * Fotoğraf çek - INSTANT SHUTTER
-     */
     fun captureImage() {
         try {
             val captureBuilder = cameraDevice?.createCaptureRequest(
@@ -318,14 +276,13 @@ class CameraController(
             
             imageReader?.surface?.let { captureBuilder.addTarget(it) }
             
-            // Zero processing uygula
             applyZeroProcessing(captureBuilder)
+            applyZoom(captureBuilder)
             
-            // JPEG kalitesi maksimum
             captureBuilder.set(CaptureRequest.JPEG_QUALITY, 100.toByte())
             
-            // Rotation
-            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, 90)
+            val rotation = if (currentCamera == CAMERA_FRONT) 270 else 90
+            captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, rotation)
             
             captureSession?.capture(
                 captureBuilder.build(),
@@ -346,10 +303,7 @@ class CameraController(
         }
     }
 
-    /**
-     * Görüntüyü kaydet
-     */
-    private fun saveImage(image: Image) {
+    private fun saveImageToGallery(image: Image) {
         val buffer = image.planes[0].buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
@@ -357,42 +311,73 @@ class CameraController(
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val fileName = "PureShot_$timestamp.jpg"
         
-        val outputDir = File(context.getExternalFilesDir(null), "PureShot")
-        if (!outputDir.exists()) outputDir.mkdirs()
-        
-        val outputFile = File(outputDir, fileName)
-        
         try {
-            FileOutputStream(outputFile).use { output ->
-                output.write(bytes)
+            val uri: Uri? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, "DCIM/PureShot")
+                    put(MediaStore.Images.Media.IS_PENDING, 1)
+                }
+                
+                val uri = context.contentResolver.insert(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    contentValues
+                )
+                
+                uri?.let {
+                    context.contentResolver.openOutputStream(it)?.use { output ->
+                        output.write(bytes)
+                    }
+                    
+                    contentValues.clear()
+                    contentValues.put(MediaStore.Images.Media.IS_PENDING, 0)
+                    context.contentResolver.update(it, contentValues, null, null)
+                }
+                
+                uri
+            } else {
+                val dcimDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
+                val pureShotDir = File(dcimDir, "PureShot")
+                if (!pureShotDir.exists()) pureShotDir.mkdirs()
+                
+                val outputFile = File(pureShotDir, fileName)
+                FileOutputStream(outputFile).use { output ->
+                    output.write(bytes)
+                }
+                
+                android.media.MediaScannerConnection.scanFile(
+                    context,
+                    arrayOf(outputFile.absolutePath),
+                    arrayOf("image/jpeg"),
+                    null
+                )
+                
+                Uri.fromFile(outputFile)
             }
-            onImageSaved?.invoke(outputFile.absolutePath)
-            Log.d(TAG, "Image saved: ${outputFile.absolutePath}")
+            
+            onImageSaved?.invoke(fileName, uri)
+            Log.d(TAG, "Image saved to gallery: $fileName")
+            
         } catch (e: Exception) {
             onError?.invoke("Save error: ${e.message}")
+            Log.e(TAG, "Save error", e)
         } finally {
             image.close()
         }
     }
 
-    /**
-     * Optimal preview boyutu
-     */
     private fun getOptimalPreviewSize(): Size {
         val characteristics = cameraManager.getCameraCharacteristics(cameraId)
         val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
         val sizes = map?.getOutputSizes(SurfaceTexture::class.java) ?: arrayOf()
         
-        // 16:9 oranına en yakın boyutu bul
         val targetRatio = 16.0 / 9.0
         return sizes.minByOrNull { 
             kotlin.math.abs(it.width.toDouble() / it.height - targetRatio) 
         } ?: Size(1920, 1080)
     }
 
-    /**
-     * En büyük çıktı boyutu (yüksek çözünürlük)
-     */
     private fun getLargestOutputSize(): Size {
         val characteristics = cameraManager.getCameraCharacteristics(cameraId)
         val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
@@ -401,9 +386,6 @@ class CameraController(
         return sizes.maxByOrNull { it.width * it.height } ?: Size(4000, 3000)
     }
 
-    /**
-     * Preview'ı güncelle (slider değiştiğinde)
-     */
     fun updatePreview() {
         try {
             val texture = textureView.surfaceTexture ?: return
@@ -415,6 +397,7 @@ class CameraController(
             
             builder.addTarget(surface)
             applyZeroProcessing(builder)
+            applyZoom(builder)
             
             captureSession?.setRepeatingRequest(
                 builder.build(),
@@ -426,29 +409,22 @@ class CameraController(
         }
     }
 
-    /**
-     * Kamera bilgilerini al
-     */
     fun getCameraInfo(): CameraInfo {
         return CameraInfo(
             isoRange = isoRange,
             exposureRange = exposureRange,
             sensorSize = sensorSize,
-            supportsRaw = supportsRaw
+            supportsRaw = supportsRaw,
+            maxZoom = maxZoom,
+            isFrontCamera = currentCamera == CAMERA_FRONT
         )
     }
 
-    /**
-     * Background thread başlat
-     */
     private fun startBackgroundThread() {
         backgroundThread = HandlerThread("CameraBackground").also { it.start() }
         backgroundHandler = Handler(backgroundThread!!.looper)
     }
 
-    /**
-     * Background thread durdur
-     */
     private fun stopBackgroundThread() {
         backgroundThread?.quitSafely()
         try {
@@ -460,9 +436,6 @@ class CameraController(
         }
     }
 
-    /**
-     * Kaynakları serbest bırak
-     */
     fun close() {
         captureSession?.close()
         captureSession = null
@@ -473,13 +446,12 @@ class CameraController(
         stopBackgroundThread()
     }
 
-    /**
-     * Camera info data class
-     */
     data class CameraInfo(
         val isoRange: android.util.Range<Int>?,
         val exposureRange: android.util.Range<Long>?,
         val sensorSize: Size,
-        val supportsRaw: Boolean
+        val supportsRaw: Boolean,
+        val maxZoom: Float,
+        val isFrontCamera: Boolean
     )
 }

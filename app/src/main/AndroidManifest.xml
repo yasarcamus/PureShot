@@ -9,6 +9,12 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     
+    <!-- Network for update checker -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Haptic feedback -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    
     <!-- Camera hardware feature -->
     <uses-feature android:name="android.hardware.camera" android:required="true" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
